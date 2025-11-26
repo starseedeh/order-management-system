@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Management System</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <header class="topbar">
+        <div class="brand">
+            <div class="logo-circle">OMS</div>
+            <div>
+                <p class="eyebrow" data-i18n="brand">Order Suite</p>
+                <h1 data-i18n="headline">Full-stack Order Management</h1>
+                <p class="subtitle" data-i18n="subhead">Track orders, commissions, inventory, and logistics in one bilingual dashboard.</p>
+            </div>
+        </div>
+        <div class="toolbar">
+            <label class="field-inline">
+                <span data-i18n="role">Role</span>
+                <select id="roleSelector">
+                    <option value="sales">Sales</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </label>
+            <label class="field-inline">
+                <span data-i18n="language">Language</span>
+                <select id="languageSelector">
+                    <option value="en">English</option>
+                    <option value="zh-TW">繁體中文</option>
+                </select>
+            </label>
+            <label class="field-inline">
+                <span data-i18n="staff">Staff</span>
+                <select id="staffSelector">
+                    <option value="1">Ruby</option>
+                    <option value="2">Kirsty</option>
+                    <option value="3">Admin</option>
+                </select>
+            </label>
+        </div>
+    </header>
+
+    <main>
+        <section class="dashboard">
+            <div class="kpi" id="kpiOrdersCard">
+                <p data-i18n="ordersLabel">Orders</p>
+                <strong id="kpiOrders">0</strong>
+            </div>
+            <div class="kpi">
+                <p data-i18n="revenue">Revenue</p>
+                <strong id="kpiRevenue">0</strong>
+            </div>
+            <div class="kpi">
+                <p data-i18n="lowStock">Safety Stock Alerts</p>
+                <strong id="kpiStock">0</strong>
+            </div>
+            <div class="kpi">
+                <p data-i18n="preorders">Pre-orders</p>
+                <strong id="kpiPreorders">0</strong>
+            </div>
+        </section>
+
+        <section class="card grid-2">
+            <div>
+                <div class="card-header">
+                    <div>
+                        <p class="eyebrow" data-i18n="orders">Orders</p>
+                        <h2 data-i18n="orderTitle">Build, edit, and fulfill orders</h2>
+                    </div>
+                    <div class="actions">
+                        <button class="ghost" id="refreshOrders" data-i18n="refresh">Refresh</button>
+                        <button class="ghost" id="exportOrdersHtml" data-i18n="exportHtml">Export HTML</button>
+                    </div>
+                </div>
+                <form id="orderForm" class="stack">
+                    <input type="hidden" id="editingOrderId" />
+                    <div class="grid">
+                        <label><span data-i18n="customer">Customer</span><select name="customer_id" id="orderCustomer"></select></label>
+                        <label><span data-i18n="sales">Sales person</span><select name="sales_person_id" id="orderSales"></select></label>
+                        <label><span data-i18n="country">Country</span><input name="country" id="orderCountry" value="UK" /></label>
+                        <label><span data-i18n="courier">Courier</span><input name="shipping_courier" id="orderCourier" placeholder="DHL" /></label>
+                        <label><span data-i18n="tracking">Tracking #</span><input name="tracking_number" id="orderTracking" /></label>
+                        <label><span data-i18n="status">Status</span><select name="status" id="orderStatus"><option value="confirmed">Confirmed</option><option value="preorder">Pre-order</option><option value="fulfilled">Fulfilled</option></select></label>
+                        <label><span data-i18n="deliveryDate">Delivery date</span><input type="date" id="deliveryDate" /></label>
+                        <label><span data-i18n="weight">Parcel weight</span><div class="input-with-unit"><input type="number" id="weightInput" step="0.01" /><select id="weightUnit"><option value="kg">kg</option><option value="g">g</option></select></div></label>
+                    </div>
+
+                    <div class="grid align-end">
+                        <label><span data-i18n="product">Product</span><select id="orderProduct"></select></label>
+                        <label><span data-i18n="preorderStage">Pre-order stage</span><select id="priceStage"></select></label>
+                        <label><span data-i18n="unitPrice">Unit price</span><input type="number" id="unitPrice" step="0.01" /></label>
+                        <label><span data-i18n="quantity">Quantity</span><input type="number" id="orderQty" value="1" min="1" /></label>
+                        <button type="button" id="addItem" class="secondary" data-i18n="addItem">Add item</button>
+                    </div>
+
+                    <div class="order-items">
+                        <table class="data-table" id="orderItemsTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="product">Product</th>
+                                    <th data-i18n="quantity">Qty</th>
+                                    <th data-i18n="unitPrice">Unit</th>
+                                    <th data-i18n="subtotal">Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="summary">
+                            <div><span data-i18n="subtotal">Subtotal</span><strong id="summarySubtotal">0</strong></div>
+                            <div><span data-i18n="vat">VAT</span><strong id="summaryVAT">0</strong></div>
+                            <div><span data-i18n="total">Total</span><strong id="summaryTotal">0</strong></div>
+                            <div><span data-i18n="commission">Commission</span><strong id="summaryCommission">0</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="primary" data-i18n="submitOrder">Submit order</button>
+                        <button type="button" class="ghost" id="resetOrder" data-i18n="reset">Reset</button>
+                    </div>
+                </form>
+            </div>
+            <div class="table-pane">
+                <h3 class="eyebrow" data-i18n="orderList">Order list</h3>
+                <table class="data-table" id="orderTable"></table>
+            </div>
+        </section>
+
+        <section class="card grid-2">
+            <div>
+                <div class="card-header">
+                    <div>
+                        <p class="eyebrow" data-i18n="products">Products</p>
+                        <h2 data-i18n="productTitle">Inventory, safety stock, and pre-order pricing</h2>
+                    </div>
+                    <div class="actions">
+                        <button id="exportProducts" class="ghost" data-i18n="export">Export CSV</button>
+                        <button id="importProducts" class="ghost" data-i18n="import">Import CSV</button>
+                        <input type="file" id="importFile" accept=".csv" hidden />
+                    </div>
+                </div>
+                <form id="productForm" class="stack">
+                    <div class="grid">
+                        <label><span data-i18n="name">Name</span><input name="name" required /></label>
+                        <label><span>SKU</span><input name="sku" required /></label>
+                        <label><span data-i18n="price">Base price</span><input name="base_price" type="number" step="0.01" required /></label>
+                        <label><span data-i18n="stock">Stock</span><input name="stock" type="number" required /></label>
+                        <label><span data-i18n="safetyStock">Safety stock</span><input name="safety_stock" type="number" required /></label>
+                        <label><span data-i18n="preorder">Pre-order?</span><input name="preorder" type="checkbox" /></label>
+                        <label><span data-i18n="earlyBirdPrice">Early bird price</span><input name="early_bird_price" type="number" step="0.01" /></label>
+                        <label><span data-i18n="earlyBirdEnd">Early bird end</span><input name="early_bird_end" type="date" /></label>
+                    </div>
+                    <div class="preorder-stages">
+                        <h4 data-i18n="stageHeader">Stages</h4>
+                        <div class="grid">
+                            <label><span data-i18n="stageName">Stage name</span><input id="stageName" /></label>
+                            <label><span data-i18n="stagePrice">Stage price</span><input id="stagePrice" type="number" step="0.01" /></label>
+                            <label><span data-i18n="stageStart">Start</span><input id="stageStart" type="date" /></label>
+                            <label><span data-i18n="stageEnd">End</span><input id="stageEnd" type="date" /></label>
+                            <button type="button" class="secondary" id="addStage" data-i18n="addStage">Add stage</button>
+                        </div>
+                        <ul id="stageList" class="pill-list"></ul>
+                    </div>
+                    <button type="submit" class="primary" data-i18n="addProduct">Add product</button>
+                </form>
+            </div>
+            <div class="table-pane">
+                <h3 class="eyebrow" data-i18n="inventory">Inventory</h3>
+                <table id="productTable" class="data-table"></table>
+            </div>
+        </section>
+
+        <section class="card grid-2">
+            <div>
+                <div class="card-header">
+                    <div>
+                        <p class="eyebrow" data-i18n="customers">Customers</p>
+                        <h2 data-i18n="customerTitle">Profiles & VAT friendly details</h2>
+                    </div>
+                    <button id="refreshCustomers" class="ghost" data-i18n="refresh">Refresh</button>
+                </div>
+                <form id="customerForm" class="stack">
+                    <div class="grid">
+                        <label><span data-i18n="name">Name</span><input name="name" required /></label>
+                        <label><span>Email</span><input name="email" type="email" required /></label>
+                        <label><span data-i18n="phone">Phone</span><input name="phone" /></label>
+                        <label><span data-i18n="address">Address</span><input name="address" /></label>
+                        <label><span data-i18n="locale">Locale</span><input name="locale" value="en" /></label>
+                    </div>
+                    <button type="submit" class="primary" data-i18n="saveCustomer">Save customer</button>
+                </form>
+            </div>
+            <div class="table-pane">
+                <h3 class="eyebrow" data-i18n="customerList">Customer list</h3>
+                <table id="customerTable" class="data-table"></table>
+            </div>
+        </section>
+
+        <section class="card utilities">
+            <div>
+                <h3 data-i18n="weightConversion">Weight conversion</h3>
+                <div class="grid">
+                    <label><span data-i18n="kilograms">Kilograms</span><input type="number" id="kgInput" step="0.001" /></label>
+                    <label><span data-i18n="grams">Grams</span><input type="number" id="gInput" step="1" /></label>
+                    <button type="button" class="secondary" id="convertWeight" data-i18n="convert">Convert</button>
+                </div>
+            </div>
+            <div>
+                <h3 data-i18n="exports">Exports</h3>
+                <div class="actions">
+                    <button id="exportOrdersPdf" class="secondary" data-i18n="downloadInvoice">Download invoice PDF</button>
+                    <button id="exportOrdersExcel" class="secondary" data-i18n="downloadExcel">Download invoice Excel</button>
+                    <button id="exportOrdersCsv" class="secondary" data-i18n="exportCsv">Export orders CSV</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p data-i18n="footer">Built for bilingual teams managing VAT, pre-orders, and commissions.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
